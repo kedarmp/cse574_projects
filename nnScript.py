@@ -2,8 +2,10 @@ import numpy as np
 from scipy.optimize import minimize
 from scipy.io import loadmat
 from math import sqrt
-
-
+import pickle
+from time import sleep
+import math
+from math import log
 
 def initializeWeights(n_in, n_out):
     """
@@ -54,6 +56,11 @@ def preprocess():
      - feature selection"""
 
     mat = loadmat('/Users/achuth/Documents/Developer/ML/mnist_all.mat')  # loads the MAT object as a Dictionary
+    # for i in mat2:
+    #     print(i)
+    #     for y in mat2[i]:
+    #         print(y)
+    #         sleep(5)
 
     # Pick a reasonable size for validation data
 
@@ -129,7 +136,6 @@ def preprocess():
 
     # Feature selection
     # Your code here.
-
     print('preprocess done')
 
     return train_data, train_label, validation_data, validation_label, test_data, test_label
@@ -179,20 +185,79 @@ def nnObjFunction(params, *args):
     w2 = params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
     obj_val = 0
 
-    # Your code here
-    #
-    #
-    #
-    #
-    #
+    w1_transpose = np.transpose(w1)
+    w2_transpose = np.transpose(w2)
+
+    training_data = np.append(training_data, np.ones([len(training_data),1]), 1)
+
+    zj = np.dot(training_data, w1_transpose)
+
+    zj = sigmoid(zj)
+
+    zj = np.append(zj, np.ones([len(zj),1]), 1)
+
+    ol = np.dot(zj, w2_transpose)
+
+    ol = sigmoid(ol)
+
+    ol_log = np.log(ol)
+
+    label_mod = np.zeros((training_data.shape[0],n_class))
+
+    for i in range(len(training_label)):
+        index = int(training_label[i])
+        label_mod[i][index] = 1
+
+    # print("Y and Log")
+    # print(label_mod.shape)
+    # print(ol_log.shape)
+
+    part1 = np.multiply(label_mod, ol_log)
+    part2a = np.subtract(1,label_mod)
+    part2b = np.log(np.subtract(1, ol))
+
+    finalSolution_parta = np.add(part1, np.multiply(part2a, part2b))
+
+    finalSolution_parta = (np.sum(finalSolution_parta)/training_data.shape[0])*(-1)
+
+    # print("NEXT")
+
+    finalSolution_partb = (np.sum(np.square(w1)) + np.sum(np.square(w2))) * (lambdaval/(2*training_data.shape[0]))
+
+    obj_val = finalSolution_parta + finalSolution_partb
+
+    # print("Reached here")
+
+    #Calculate grad descent
+    #Calculate w2
+    derivate2 = np.dot(np.transpose(zj),(np.subtract(ol,label_mod)))
+    # print("derivate2",derivate2.shape)
+    sum2 = np.sum(derivate2)
+    # print("matrix1",sum2.shape)
+    grad_w2 = np.add(sum2,np.multiply(lambdaval,w2))/training_data.shape[0]
+    # print("grad_w2",grad_w2.shape)
 
 
-
+    #calculate grad_w1
+    modified_w2 = w2[:,len(w2)-1]
+    # print("modified_w2",modified_w2.shape)
+    t1 = np.sum(np.dot(np.subtract(ol,label_mod),modified_w2))
+    # print("t1",t1.shape)
+    t2 = np.multiply(t1,training_data)
+    t3=np.multiply(np.subtract(1,zj),zj)
+    # print("t2" , t2.shape)
+    # print("t3", t3.shape)
+    partasum = np.dot(np.transpose(t3),np.dot(t1,t2))
+    # print("partasum",partasum.shape)
+    grad_w1 = np.add(np.sum(partasum),np.multiply(lambdaval,w1))/training_data.shape[0]
+    # print("grad_w1",grad_w1.shape)
     # Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     # you would use code similar to the one below to create a flat array
-    # obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
-    obj_grad = np.array([])
+    obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
+    #obj_grad = np.array([])
 
+    # print("Shape", obj_grad.shape)
+    # print("Value", obj_val)
     return (obj_val, obj_grad)
 
 
@@ -212,20 +277,18 @@ def nnPredict(w1, w2, data):
 
     % Output:
     % label: a column vector of predicted labels"""
-
-    labels = np.array([])
-    # Your code here
+    
 
     return labels
 
 
 """**************Neural Network Script Starts here********************************"""
-print("works");
 
 train_data, train_label, validation_data, validation_label, test_data, test_label = preprocess()
 
 #  Train Neural Network
-
+print("train label" , train_label)
+print("train label shape" , train_label.shape)
 # set the number of nodes in input unit (not including bias unit)
 n_input = train_data.shape[1]
 
@@ -249,9 +312,9 @@ args = (n_input, n_hidden, n_class, train_data, train_label, lambdaval)
 
 # Train Neural Network using fmin_cg or minimize from scipy,optimize module. Check documentation for a working example
 
-opts = {'maxiter': 50}  # Preferred value.
+opts = {'maxiter': 1}  # Preferred value.
 
-nn_params = minimize(nnObjFunction, initialWeights, jac=True, args=args, method='CG', options=opts)
+#nn_params = minimize(nnObjFunction, initialWeights, jac=True, args=args, method='CG', options=opts)
 
 # In Case you want to use fmin_cg, you may have to split the nnObjectFunction to two functions nnObjFunctionVal
 # and nnObjGradient. Check documentation for this function before you proceed.
@@ -259,12 +322,12 @@ nn_params = minimize(nnObjFunction, initialWeights, jac=True, args=args, method=
 
 
 # Reshape nnParams from 1D vector into w1 and w2 matrices
-w1 = nn_params.x[0:n_hidden * (n_input + 1)].reshape((n_hidden, (n_input + 1)))
-w2 = nn_params.x[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
+# w1 = nn_params.x[0:n_hidden * (n_input + 1)].reshape((n_hidden, (n_input + 1)))
+# w2 = nn_params.x[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
 
 # Test the computed parameters
 
-predicted_label = nnPredict(w1, w2, train_data)
+predicted_label = nnPredict(initial_w1, initial_w2, train_data)
 
 # find the accuracy on Training Dataset
 
