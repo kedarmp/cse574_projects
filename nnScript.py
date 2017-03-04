@@ -207,8 +207,8 @@ def nnObjFunction(params, *args):
         label_mod[i][index] = 1
 
     # print("Y and Log")
-    # print(label_mod.shape)
-    # print(ol_log.shape)
+    print(label_mod.shape)
+    print(ol_log.shape)
 
     part1 = np.multiply(label_mod, ol_log)
     part2a = np.subtract(1,label_mod)
@@ -296,7 +296,8 @@ def nnPredict(w1, w2, data):
     #print("label" , labels.shape)
     # Your code here
     #max = 0
-    #print("length of ol", len(ol))
+    print("ol print: ", ol)
+    sleep(5)
     for i in range(len(ol)):
         m = np.argmax(ol[i])
         labels[0][i] = m
@@ -336,7 +337,7 @@ args = (n_input, n_hidden, n_class, train_data, train_label, lambdaval)
 
 # Train Neural Network using fmin_cg or minimize from scipy,optimize module. Check documentation for a working example
 
-opts = {'maxiter': 10}  # Preferred value.
+opts = {'maxiter': 50}  # Preferred value.
 
 nn_params = minimize(nnObjFunction, initialWeights, jac=True, args=args, method='CG', options=opts)
 
