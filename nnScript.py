@@ -293,6 +293,8 @@ def nnPredict(w1, w2, data):
 
     ol = sigmoid(ol)
 
+    print("OL : ", ol[5], ol[200], ol[500])
+
     # print("ol",ol.shape)
     # labels = np.zeros((ol.shape[0],1))
     # #print("label" , labels.shape)
