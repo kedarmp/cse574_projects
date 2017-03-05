@@ -228,60 +228,59 @@ def preprocess():
 """**************Neural Network Script Starts here********************************"""
 train_data, train_label, validation_data, validation_label, test_data, test_label = preprocess()
 print('#Hidden\tLambda\tTrain Acc\tValidation Acc\tTest acc\n')
+#best value of hidden layers
+for j in range(4,61,10):  # 4 - 60 hidden layers
+    #  Train Neural Network
+    # set the number of nodes in input unit (not including bias unit)
+    n_input = train_data.shape[1]
+    # set the number of nodes in hidden unit (not including bias unit)
+    n_hidden = j
+    # set the number of nodes in output unit
+    n_class = 2
 
-for j in range(20,101,10):  # 20 - 100 hidden layers
-    for k in range(0,61,5): # 0 - 60    lambda
-        #  Train Neural Network
-        # set the number of nodes in input unit (not including bias unit)
-        n_input = train_data.shape[1]
-        # set the number of nodes in hidden unit (not including bias unit)
-        n_hidden = j
-        # set the number of nodes in output unit
-        n_class = 2
+    # initialize the weights into some random matrices
+    initial_w1 = initializeWeights(n_input, n_hidden);
+    initial_w2 = initializeWeights(n_hidden, n_class);
+    # unroll 2 weight matrices into single column vector
+    initialWeights = np.concatenate((initial_w1.flatten(), initial_w2.flatten()),0)
+    # set the regularization hyper-parameter
+    lambdaval = INSERT_BEST_LAMBDA_VAL_HERE;
+    args = (n_input, n_hidden, n_class, train_data, train_label, lambdaval)
 
-        # initialize the weights into some random matrices
-        initial_w1 = initializeWeights(n_input, n_hidden);
-        initial_w2 = initializeWeights(n_hidden, n_class);
-        # unroll 2 weight matrices into single column vector
-        initialWeights = np.concatenate((initial_w1.flatten(), initial_w2.flatten()),0)
-        # set the regularization hyper-parameter
-        lambdaval = k;
-        args = (n_input, n_hidden, n_class, train_data, train_label, lambdaval)
+    start = datetime.now().replace(microsecond=0)
+    #Train Neural Network using fmin_cg or minimize from scipy,optimize module. Check documentation for a working example
+    opts = {'maxiter' :50}    # Preferred value.
 
-        # start = datetime.now().replace(microsecond=0)
-        #Train Neural Network using fmin_cg or minimize from scipy,optimize module. Check documentation for a working example
-        opts = {'maxiter' :50}    # Preferred value.
+    nn_params = minimize(nnObjFunction, initialWeights, jac=True, args=args,method='CG', options=opts)
+    start = datetime.now().replace(microsecond=0) - start
 
-        nn_params = minimize(nnObjFunction, initialWeights, jac=True, args=args,method='CG', options=opts)
-        # start = datetime.now().replace(microsecond=0) - start
+    params = nn_params.get('x')
+    #Reshape nnParams from 1D vector into w1 and w2 matrices
+    w1 = params[0:n_hidden * (n_input + 1)].reshape( (n_hidden, (n_input + 1)))
+    w2 = params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
 
-        params = nn_params.get('x')
-        #Reshape nnParams from 1D vector into w1 and w2 matrices
-        w1 = params[0:n_hidden * (n_input + 1)].reshape( (n_hidden, (n_input + 1)))
-        w2 = params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
+    #Test the computed parameters
+    predicted_label = nnPredict(w1,w2,train_data)
+    # print('\nHidden layers:' + str(n_hidden) + '\n')
+    # print('\nLambda:' + str(lambdaval) + '\n')
+    # #find the accuracy on Training Dataset
+    # print('\n Training set Accuracy:' + str(100*np.mean((predicted_label == train_label).astype(float))) + '%')
+    predicted_label = nnPredict(w1,w2,validation_data)
+    # #find the accuracy on Validation Dataset
+    # print('\n Validation set Accuracy:' + str(100*np.mean((predicted_label == validation_label).astype(float))) + '%')
+    predicted_label = nnPredict(w1,w2,test_data)
+    # #find the accuracy on Validation Dataset
+    # print('\n Test set Accuracy:' +  str(100*np.mean((predicted_label == test_label).astype(float))) + '%'+'\n')
 
-        #Test the computed parameters
-        predicted_label = nnPredict(w1,w2,train_data)
-        # print('\nHidden layers:' + str(n_hidden) + '\n')
-        # print('\nLambda:' + str(lambdaval) + '\n')
-        # #find the accuracy on Training Dataset
-        # print('\n Training set Accuracy:' + str(100*np.mean((predicted_label == train_label).astype(float))) + '%')
-        predicted_label = nnPredict(w1,w2,validation_data)
-        # #find the accuracy on Validation Dataset
-        # print('\n Validation set Accuracy:' + str(100*np.mean((predicted_label == validation_label).astype(float))) + '%')
-        predicted_label = nnPredict(w1,w2,test_data)
-        # #find the accuracy on Validation Dataset
-        # print('\n Test set Accuracy:' +  str(100*np.mean((predicted_label == test_label).astype(float))) + '%'+'\n')
-
-        print(str(n_hidden),end='\t')
-        print(str(lambdaval),end='\t')
-        predicted_label = nnPredict(w1, w2, train_data)
-        print(str(100*np.mean((predicted_label == train_label).astype(float))),end='\t')
-        predicted_label = nnPredict(w1, w2, validation_data)
-        print(str(100*np.mean((predicted_label == validation_label).astype(float))),end='\t')
-        predicted_label = nnPredict(w1, w2, test_data)
-        print(str(100*np.mean((predicted_label == test_label).astype(float))),end='\t')
-        # print(str(start),end='\t')
-        #print(str(n_hidden)+','+str(lambdaval))+','+str(100*np.mean((predicted_label == train_label).astype(float)))+','+str(100*np.mean((predicted_label == validation_label).astype(float)))+ ','+ str(100*np.mean((predicted_label == test_label).astype(float)))
-        print('\n')
+    print(str(n_hidden),end='\t')
+    print(str(lambdaval),end='\t')
+    predicted_label = nnPredict(w1, w2, train_data)
+    print(str(100*np.mean((predicted_label == train_label).astype(float))),end='\t')
+    predicted_label = nnPredict(w1, w2, validation_data)
+    print(str(100*np.mean((predicted_label == validation_label).astype(float))),end='\t')
+    predicted_label = nnPredict(w1, w2, test_data)
+    print(str(100*np.mean((predicted_label == test_label).astype(float))),end='\t')
+    print(str(start),end='\t')
+    #print(str(n_hidden)+','+str(lambdaval))+','+str(100*np.mean((predicted_label == train_label).astype(float)))+','+str(100*np.mean((predicted_label == validation_label).astype(float)))+ ','+ str(100*np.mean((predicted_label == test_label).astype(float)))
+    print('\n')
 

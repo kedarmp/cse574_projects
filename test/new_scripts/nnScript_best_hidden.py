@@ -323,8 +323,9 @@ train_data, train_label, validation_data, validation_label, test_data, test_labe
 n_input = train_data.shape[1]
 
 print('#Hidden\tLambda\tTrain Acc\tValidation Acc\tTest acc\n')
-for j in range(20,101,10):  # 20 - 100
-    for k in range(0,61,5): # 0 - 60
+#best value of hidden layers
+for j in range(20,101,10):  # 20 - 100 hidden layers
+    for k in range(0,61,5): # 0 - 60    lambda
     # set the number of nodes in hidden unit (not including bias unit)
         n_hidden = j
 
