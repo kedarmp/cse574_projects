@@ -52,7 +52,7 @@ def preprocess():
      Some suggestions for preprocessing step:
      - feature selection"""
 
-    mat = loadmat('../mnist_all.mat')  # loads the MAT object as a Dictionary
+    mat = loadmat('../../mnist_all.mat')  # loads the MAT object as a Dictionary
     # for i in mat2:
     #     print(i)
     #     for y in mat2[i]:

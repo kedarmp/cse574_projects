@@ -212,7 +212,7 @@ def nnPredict(w1, w2, data):
 
 # Do not change this
 def preprocess():
-    pickle_obj = pickle.load(file=open('../face_all.pickle', 'rb'))
+    pickle_obj = pickle.load(file=open('../../face_all.pickle', 'rb'))
     features = pickle_obj['Features']
     labels = pickle_obj['Labels']
     train_x = features[0:21100] / 255
