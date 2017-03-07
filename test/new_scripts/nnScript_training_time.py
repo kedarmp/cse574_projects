@@ -324,7 +324,7 @@ n_input = train_data.shape[1]
 
 print('#Hidden\tLambda\tTrain Acc\tValidation Acc\tTest acc\tTime taken(s)\n')
 #best value of hidden layers
-for j in range(4,61,10):  # 4 - 60 hidden layers
+for j in range(4,61,4):  # 4 - 60 hidden layers
     # set the number of nodes in hidden unit (not including bias unit)
         n_hidden = j
 
@@ -339,7 +339,7 @@ for j in range(4,61,10):  # 4 - 60 hidden layers
         initialWeights = np.concatenate((initial_w1.flatten(), initial_w2.flatten()), 0)
 
         # set the regularization hyper-parameter
-        lambdaval = INSERT_BEST_LAMBDA_VALUE_HERE
+        lambdaval = 0 #INSERT_BEST_LAMBDA_VALUE_HERE
 
         args = (n_input, n_hidden, n_class, train_data, train_label, lambdaval)
 
