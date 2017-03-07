@@ -130,12 +130,45 @@ def preprocess():
     test_data = test_data / 255.0
     test_label = test_label_preprocess[test_perm]
 
+
     # Feature selection
     # Your code here.
+
+    # Concatenating train_data and validation_data to create a 60000 x 784 matrix
+    # by placing validation_data matrix below train_data
+    new_mat = np.concatenate((train_data, validation_data), axis=0);
+    print(new_mat.shape)
+    # Compares all values in a column to its first element to see if all values are equal
+    # and returns a boolean matrix
+    bool_mat = np.equal(new_mat[0, :], new_mat)
+    print(bool_mat.shape)
+    # Returns a 1D array comparing all the values in each column. If all the values are
+    # the same then it returns True else False
+    bool_result_array = np.all(bool_mat, axis = 0)
+    print(bool_result_array.shape)
+    # Below in bool_result_array the indices where True is present
+    # is used to delete the columns present in the same indices from new_mymat,
+    # train_data and validation_data
+    length_result = bool_result_array.shape[0]
+    columnsToDelete = np.where(bool_result_array == True)
+    print("Columns to delete: ", columnsToDelete[0])
+    #new_mymatrix = np.delete(new_mat,columnsToDelete[0],1)
+    new_train_data = np.delete(train_data,columnsToDelete[0],1)
+    new_validation_data = np.delete(validation_data,columnsToDelete[0],1)
+    new_test_data = np.delete(test_data, columnsToDelete[0], 1)
+
+    #print (new_mymatrix.shape)
+    # print (new_train_data.shape)
+    # print (new_validation_data.shape)
+    train_data = new_train_data
+    validation_data = new_validation_data
+    test_data = new_test_data
+
+
+
     print('preprocess done')
 
     return train_data, train_label, validation_data, validation_label, test_data, test_label
-
 
 def nnObjFunction(params, *args):
     """% nnObjFunction computes the value of objective function (negative log
@@ -181,20 +214,16 @@ def nnObjFunction(params, *args):
     w2 = params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
     obj_val = 0
 
-    w1_transpose = np.transpose(w1)
-    w2_transpose = np.transpose(w2)
-
     # Check
     training_data = np.append(training_data, np.ones((training_data.shape[0],1)), 1)
-    #print("Should actually be 1 : ", training_data[20000, -1])
 
-    zj = np.dot(training_data, w1_transpose)
+    zj = np.dot(training_data, np.transpose(w1))
 
     zj = sigmoid(zj)
 
     zj = np.append(zj, np.ones((zj.shape[0], 1)),1)
 
-    ol = np.dot(zj, w2_transpose)
+    ol = np.dot(zj, np.transpose(w2))
 
     ol = sigmoid(ol)
 
@@ -204,60 +233,34 @@ def nnObjFunction(params, *args):
 
     for i in range(training_label.shape[0]):
         index = int(training_label[i])
-        # print(index)
         label_mod[i][index] = 1
 
-    # print("Y and Log")
-    #print(label_mod.shape)
-    #print(ol_log.shape)
 
-    part1 = np.multiply(label_mod, ol_log)
-    part2a = np.subtract(1,label_mod)
-    part2b = np.log(np.subtract(1, ol))
-
-    finalSolution_parta = np.add(part1, np.multiply(part2a, part2b))
+    finalSolution_parta = np.add(np.multiply(label_mod, ol_log), np.multiply(np.subtract(1,label_mod), np.log(np.subtract(1, ol))))
 
     finalSolution_parta = np.divide(np.sum(finalSolution_parta),(-1)*training_data.shape[0])
-
-    # print("NEXT")
 
     finalSolution_partb = (np.sum(np.square(w1)) + np.sum(np.square(w2))) * np.divide(lambdaval,(2*training_data.shape[0]))
 
     obj_val = finalSolution_parta + finalSolution_partb
 
-    # print("Reached here")
-
     #Calculate grad descent
     #Calculate w2
-    derivate2 = np.dot(np.transpose(np.subtract(ol,label_mod)), zj)
-    # print("derivate2",derivate2.shape)
-    # print("matrix1",sum2.shape)
-    grad_w2 = np.divide(np.add(derivate2,np.multiply(lambdaval,w2)),training_data.shape[0])
-    # print("grad_w2",grad_w2.shape)
+    grad_w2 = np.divide(np.add(np.dot(np.transpose(np.subtract(ol,label_mod)), zj), np.multiply(lambdaval,w2)),training_data.shape[0])
 
-
-    #calculate grad_w1
+    #calculating grad_w1
     modified_w2 = w2[:,0:w2.shape[1]-1]
-    print("modified_w2",modified_w2.shape)
-    t1 = np.dot(np.subtract(ol,label_mod),modified_w2)
-    print("t1",t1.shape)
-    # t2 = np.multiply(t1,training_data)
+
     zj = zj[:,0:zj.shape[1]-1]
-    t3 = np.multiply(np.subtract(1,zj),zj)
-    # print("t2" , t2.shape)
-    print("t3", t3.shape)
-    t = np.multiply(t3,t1)
-    grad_w1 = np.dot(t.T,training_data)
-    # print("partasum",partasum.shape)
-    grad_w1 = np.add(grad_w1,np.multiply(lambdaval,w1))/training_data.shape[0]
-    print("grad_w1",grad_w1.shape)
+
+    temp = np.multiply(np.multiply(np.subtract(1,zj),zj),np.dot(np.subtract(ol,label_mod),modified_w2))
+
+    grad_w1 = np.add(np.dot(temp.T,training_data),np.multiply(lambdaval,w1))/training_data.shape[0]
+
     # Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     # you would use code similar to the one below to create a flat array
     obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
-    #obj_grad = np.array([])
-    print(obj_val)
-    # print("Shape", obj_grad.shape)
-    # print("Value", obj_val)
+
     return (obj_val, obj_grad)
 
 
