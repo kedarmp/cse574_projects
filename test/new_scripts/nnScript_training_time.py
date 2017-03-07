@@ -52,7 +52,7 @@ def preprocess():
      Some suggestions for preprocessing step:
      - feature selection"""
 
-    mat = loadmat('../mnist_all.mat')  # loads the MAT object as a Dictionary
+    mat = loadmat('../../mnist_all.mat')  # loads the MAT object as a Dictionary
     # for i in mat2:
     #     print(i)
     #     for y in mat2[i]:
@@ -322,9 +322,9 @@ train_data, train_label, validation_data, validation_label, test_data, test_labe
 # set the number of nodes in input unit (not including bias unit)
 n_input = train_data.shape[1]
 
-print('#Hidden\tLambda\tTrain Acc\tValidation Acc\tTest acc\n')
-for j in range(20,101,10):  # 20 - 100
-    for k in range(0,61,5): # 0 - 60
+print('#Hidden\tLambda\tTrain Acc\tValidation Acc\tTest acc\tTime taken(s)\n')
+#best value of hidden layers
+for j in range(4,61,4):  # 4 - 60 hidden layers
     # set the number of nodes in hidden unit (not including bias unit)
         n_hidden = j
 
@@ -339,16 +339,16 @@ for j in range(20,101,10):  # 20 - 100
         initialWeights = np.concatenate((initial_w1.flatten(), initial_w2.flatten()), 0)
 
         # set the regularization hyper-parameter
-        lambdaval = k
+        lambdaval = 0 #INSERT_BEST_LAMBDA_VALUE_HERE
 
         args = (n_input, n_hidden, n_class, train_data, train_label, lambdaval)
 
         # Train Neural Network using fmin_cg or minimize from scipy,optimize module. Check documentation for a working example
-        # start = datetime.now().replace(microsecond=0)
+        start = datetime.now().replace(microsecond=0)
         opts = {'maxiter': 50}  # Preferred value.
 
         nn_params = minimize(nnObjFunction, initialWeights, jac=True, args=args, method='CG', options=opts)
-        # start = datetime.now().replace(microsecond=0) - start
+        start = datetime.now().replace(microsecond=0) - start
 
         # In Case you want to use fmin_cg, you may have to split the nnObjectFunction to two functions nnObjFunctionVal
         # and nnObjGradient. Check documentation for this function before you proceed.
@@ -392,6 +392,6 @@ for j in range(20,101,10):  # 20 - 100
         print(str(100*np.mean((predicted_label == validation_label).astype(float))),end='\t')
         predicted_label = nnPredict(w1, w2, test_data)
         print(str(100*np.mean((predicted_label == test_label).astype(float))),end='\t')
-        # print(str(start),end='\t')
+        print(str(start),end='\t')
         #print(str(n_hidden)+','+str(lambdaval))+','+str(100*np.mean((predicted_label == train_label).astype(float)))+','+str(100*np.mean((predicted_label == validation_label).astype(float)))+ ','+ str(100*np.mean((predicted_label == test_label).astype(float)))
         print('\n')
