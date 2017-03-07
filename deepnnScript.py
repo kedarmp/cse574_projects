@@ -14,6 +14,7 @@ def create_multilayer_perceptron():
     # Network Parameters
     n_hidden_1 = 256  # 1st layer number of features
     n_hidden_2 = 256  # 2nd layer number of features
+    n_hidden_3 = 256
     n_input = 2376  # data input
     n_classes = 2
 
@@ -21,11 +22,13 @@ def create_multilayer_perceptron():
     weights = {
         'h1': tf.Variable(tf.random_normal([n_input, n_hidden_1])),
         'h2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2])),
-        'out': tf.Variable(tf.random_normal([n_hidden_2, n_classes]))
+        'h3': tf.Variable(tf.random_normal([n_hidden_2, n_hidden_3])),
+        'out': tf.Variable(tf.random_normal([n_hidden_3, n_classes]))
     }
     biases = {
         'b1': tf.Variable(tf.random_normal([n_hidden_1])),
         'b2': tf.Variable(tf.random_normal([n_hidden_2])),
+        'b3': tf.Variable(tf.random_normal([n_hidden_3])),
         'out': tf.Variable(tf.random_normal([n_classes]))
     }
     # tf Graph input
@@ -39,8 +42,10 @@ def create_multilayer_perceptron():
     # Hidden layer with RELU activation
     layer_2 = tf.add(tf.matmul(layer_1, weights['h2']), biases['b2'])
     layer_2 = tf.nn.relu(layer_2)
+    layer_3 = tf.add(tf.matmul(layer_2, weights['h3']), biases['b3'])
+    layer_3 = tf.nn.relu(layer_3)
     # Output layer with linear activation
-    out_layer = tf.matmul(layer_2, weights['out']) + biases['out']
+    out_layer = tf.matmul(layer_3, weights['out']) + biases['out']
     return out_layer,x,y
 
 # Do not change this
@@ -81,7 +86,7 @@ cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, label
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 
 # Initializing the variables
-init = tf.global_variables_initializer()
+init = tf.initialize_all_variables()
 
 # load data
 train_features, train_labels, valid_features, valid_labels, test_features, test_labels = preprocess()
