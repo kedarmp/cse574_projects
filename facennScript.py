@@ -82,7 +82,7 @@ def nnObjFunction(params, *args):
 
     # Check
     training_data = np.append(training_data, np.ones((training_data.shape[0],1)), 1)
-    #print("Should actually be 1 : ", training_data[20000, -1])
+    
 
     zj = np.dot(training_data, w1_transpose)
 
@@ -126,34 +126,24 @@ def nnObjFunction(params, *args):
     #Calculate grad descent
     #Calculate w2
     derivate2 = np.dot(np.transpose(np.subtract(ol,label_mod)), zj)
-    # print("derivate2",derivate2.shape)
-    # print("matrix1",sum2.shape)
+
     grad_w2 = np.divide(np.add(derivate2,np.multiply(lambdaval,w2)),training_data.shape[0])
     # print("grad_w2",grad_w2.shape)
 
 
     #calculate grad_w1
     modified_w2 = w2[:,0:w2.shape[1]-1]
-    print("modified_w2",modified_w2.shape)
     t1 = np.dot(np.subtract(ol,label_mod),modified_w2)
-    print("t1",t1.shape)
-    # t2 = np.multiply(t1,training_data)
     zj = zj[:,0:zj.shape[1]-1]
     t3 = np.multiply(np.subtract(1,zj),zj)
-    # print("t2" , t2.shape)
-    print("t3", t3.shape)
     t = np.multiply(t3,t1)
     grad_w1 = np.dot(t.T,training_data)
-    # print("partasum",partasum.shape)
     grad_w1 = np.add(grad_w1,np.multiply(lambdaval,w1))/training_data.shape[0]
-    print("grad_w1",grad_w1.shape)
     # Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     # you would use code similar to the one below to create a flat array
     obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
     #obj_grad = np.array([])
-    print(obj_val)
-    # print("Shape", obj_grad.shape)
-    # print("Value", obj_val)
+    # print(obj_val)
     return (obj_val, obj_grad)
 
 
@@ -173,11 +163,8 @@ def nnPredict(w1, w2, data):
 
     % Output:
     % label: a column vector of predicted labels"""
-    # print("data", data.shape)
-    # print("w1", w1.shape)
-    # print("w2", w2.shape)
+
     data_with_bias = np.append(data, np.ones((data.shape[0],1)), 1)
-    # print("data_with_bias", data_with_bias.shape)
     #Feed Forward
     zj = np.dot(data_with_bias, np.transpose(w1))
 
@@ -188,22 +175,6 @@ def nnPredict(w1, w2, data):
     ol = np.dot(zj, np.transpose(w2))
 
     ol = sigmoid(ol)
-
-    print("OL : ", ol[5], ol[200], ol[500])
-
-    # print("ol",ol.shape)
-    # labels = np.zeros((ol.shape[0],1))
-    # #print("label" , labels.shape)
-    # # Your code here
-    # #max = 0
-    # # print("ol print: ", ol)
-    # # sleep(5)
-    # for i in range(ol.shape[0]):
-    #     m = np.argmax(ol[i])
-    #     labels[i][0] = m
-        # print ("Argmax", m)
-    # print("labels shape", labels.shape)
-
     labels = np.argmax(ol,axis=1)
 
     return labels
@@ -230,7 +201,7 @@ train_data, train_label, validation_data, validation_label, test_data, test_labe
 # set the number of nodes in input unit (not including bias unit)
 n_input = train_data.shape[1]
 # set the number of nodes in hidden unit (not including bias unit)
-n_hidden = 256
+n_hidden = 80
 # set the number of nodes in output unit
 n_class = 2
 
@@ -240,7 +211,7 @@ initial_w2 = initializeWeights(n_hidden, n_class);
 # unroll 2 weight matrices into single column vector
 initialWeights = np.concatenate((initial_w1.flatten(), initial_w2.flatten()),0)
 # set the regularization hyper-parameter
-lambdaval = 10;
+lambdaval = 5
 args = (n_input, n_hidden, n_class, train_data, train_label, lambdaval)
 
 #Train Neural Network using fmin_cg or minimize from scipy,optimize module. Check documentation for a working example

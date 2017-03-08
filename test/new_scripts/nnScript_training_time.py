@@ -324,7 +324,7 @@ n_input = train_data.shape[1]
 
 print('#Hidden\tLambda\tTrain Acc\tValidation Acc\tTest acc\tTime taken(s)\n')
 #best value of hidden layers
-for j in range(4,61,4):  # 4 - 60 hidden layers
+for j in range(60,81,4):  # 4 - 60 hidden layers
     # set the number of nodes in hidden unit (not including bias unit)
         n_hidden = j
 

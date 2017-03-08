@@ -229,7 +229,7 @@ def preprocess():
 train_data, train_label, validation_data, validation_label, test_data, test_label = preprocess()
 print('#Hidden\tLambda\tTrain Acc\tValidation Acc\tTest acc\n')
 #best value of hidden layers
-for j in range(4,61,4):  # 4 - 60 hidden layers
+for j in range(60,81,4):  # 4 - 60 hidden layers
     #  Train Neural Network
     # set the number of nodes in input unit (not including bias unit)
     n_input = train_data.shape[1]
@@ -283,4 +283,3 @@ for j in range(4,61,4):  # 4 - 60 hidden layers
     print(str(start),end='\t')
     #print(str(n_hidden)+','+str(lambdaval))+','+str(100*np.mean((predicted_label == train_label).astype(float)))+','+str(100*np.mean((predicted_label == validation_label).astype(float)))+ ','+ str(100*np.mean((predicted_label == test_label).astype(float)))
     print('\n')
-

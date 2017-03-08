@@ -4,6 +4,9 @@ from scipy.io import loadmat
 from math import sqrt
 from time import sleep
 import math
+import pickle
+
+global selected_features
 
 def initializeWeights(n_in, n_out):
     """
@@ -131,42 +134,32 @@ def preprocess():
     test_label = test_label_preprocess[test_perm]
 
 
-    # Feature selection
+# Feature selection
     # Your code here.
 
-    # Concatenating train_data and validation_data to create a 60000 x 784 matrix
-    # by placing validation_data matrix below train_data
-    new_mat = np.concatenate((train_data, validation_data), axis=0);
-    print(new_mat.shape)
     # Compares all values in a column to its first element to see if all values are equal
     # and returns a boolean matrix
-    bool_mat = np.equal(new_mat[0, :], new_mat)
-    print(bool_mat.shape)
+    bool_mat = np.equal(train_data[0, :], train_data)
+    # print(bool_mat.shape)
     # Returns a 1D array comparing all the values in each column. If all the values are
     # the same then it returns True else False
     bool_result_array = np.all(bool_mat, axis = 0)
-    print(bool_result_array.shape)
+    # print(bool_result_array.shape)
     # Below in bool_result_array the indices where True is present
     # is used to delete the columns present in the same indices from new_mymat,
     # train_data and validation_data
     length_result = bool_result_array.shape[0]
     columnsToDelete = np.where(bool_result_array == True)
-    print("Columns to delete: ", columnsToDelete[0])
-    #new_mymatrix = np.delete(new_mat,columnsToDelete[0],1)
+    global selected_features
+    selected_features = np.where(bool_result_array == False)
+    #print(columnsToDelete[0])
     new_train_data = np.delete(train_data,columnsToDelete[0],1)
     new_validation_data = np.delete(validation_data,columnsToDelete[0],1)
     new_test_data = np.delete(test_data, columnsToDelete[0], 1)
-
-    #print (new_mymatrix.shape)
-    # print (new_train_data.shape)
-    # print (new_validation_data.shape)
     train_data = new_train_data
     validation_data = new_validation_data
     test_data = new_test_data
 
-
-
-    print('preprocess done')
 
     return train_data, train_label, validation_data, validation_label, test_data, test_label
 
@@ -280,11 +273,10 @@ def nnPredict(w1, w2, data):
 
     % Output:
     % label: a column vector of predicted labels"""
-    # print("data", data.shape)
-    # print("w1", w1.shape)
-    # print("w2", w2.shape)
+
+
     data_with_bias = np.append(data, np.ones((data.shape[0],1)), 1)
-    # print("data_with_bias", data_with_bias.shape)
+
     #Feed Forward
     zj = np.dot(data_with_bias, np.transpose(w1))
 
@@ -296,19 +288,6 @@ def nnPredict(w1, w2, data):
 
     ol = sigmoid(ol)
 
-    # print("ol",ol.shape)
-    # labels = np.zeros((ol.shape[0],1))
-    # #print("label" , labels.shape)
-    # # Your code here
-    # #max = 0
-    # # print("ol print: ", ol)
-    # # sleep(5)
-    # for i in range(ol.shape[0]):
-    #     m = np.argmax(ol[i])
-    #     labels[i][0] = m
-        # print ("Argmax", m)
-    # print("labels shape", labels.shape)
-
     labels = np.argmax(ol,axis=1)
 
     return labels
@@ -318,6 +297,8 @@ def nnPredict(w1, w2, data):
 
 train_data, train_label, validation_data, validation_label, test_data, test_label = preprocess()
 
+# print(selected_f÷eatures)
+
 #  Train Neural Network
 # print("train label" , train_label)
 # print("train label shape" , train_label.shape)
@@ -325,7 +306,7 @@ train_data, train_label, validation_data, validation_label, test_data, test_labe
 n_input = train_data.shape[1]
 
 # set the number of nodes in hidden unit (not including bias unit)
-n_hidden = 50
+n_hidden = 80
 
 # set the number of nodes in output unit
 n_class = 10
@@ -358,6 +339,11 @@ w1 = nn_params.x[0:n_hidden * (n_input + 1)].reshape((n_hidden, (n_input + 1)))
 w2 = nn_params.x[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
 
 # Test the computed parameters
+
+obj = [selected_features, n_hidden, w1, w2, lambdaval]
+# selected_features is a list of feature indices that you use after removing unwanted features in feature selection step
+
+pickle.dump(obj, open('params.pickle', 'wb'))
 
 predicted_label = nnPredict(w1, w2, train_data)
 
