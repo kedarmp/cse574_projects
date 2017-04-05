@@ -66,10 +66,11 @@ def learnOLERegression(X,y):
     # y = N x 1                                                               
     # Output: 
     # w = d x 1 
-	
-    # IMPLEMENT THIS METHOD
-    # return w
-    return 1  # REMOVE THIS!
+    X_transpose = np.transpose(X)
+
+    w = np.dot(np.dot(inv(np.dot(X_transpose,X)),X_transpose),y)
+    return w
+
 
 def learnRidgeRegression(X,y,lambd):
     # Inputs:
@@ -79,10 +80,10 @@ def learnRidgeRegression(X,y,lambd):
     # Output:                                                                  
     # w = d x 1                                                                
 
-    X_transpose = np.transpose(X);
+    X_transpose = np.transpose(X)
     identity = np.identity(X.shape[1])
     part1a = lambd * identity
-    part1b = np.dot(X_transpose,X);
+    part1b = np.dot(X_transpose,X)
     part1 = np.add(part1a,part1b)
     # print (part1)
     part1 = inv(part1)
@@ -146,6 +147,7 @@ def mapNonLinear(x,p):
 # Main script
 
 # Problem 1
+# print('\nProblem 1')
 # load the sample data                                                                 
 # if sys.version_info.major == 2:
 #     X,y,Xtest,ytest = pickle.load(open('sample.pickle','rb'))
@@ -186,6 +188,7 @@ def mapNonLinear(x,p):
 #
 # plt.show()
 # Problem 2
+print('\nProblem 2')
 if sys.version_info.major == 2:
     X,y,Xtest,ytest = pickle.load(open('diabetes.pickle','rb'))
 else:
@@ -195,16 +198,18 @@ else:
 X_i = np.concatenate((np.ones((X.shape[0],1)), X), axis=1)
 Xtest_i = np.concatenate((np.ones((Xtest.shape[0],1)), Xtest), axis=1)
 
-# w = learnOLERegression(X,y)
-# mle = testOLERegression(w,Xtest,ytest)
-#
-# w_i = learnOLERegression(X_i,y)
-# mle_i = testOLERegression(w_i,Xtest_i,ytest)
-#
-# print('MSE without intercept '+str(mle))
-# print('MSE with intercept '+str(mle_i))
+w = learnOLERegression(X,y)
+mle = testOLERegression(w,Xtest,ytest)
+
+w_i = learnOLERegression(X_i,y)
+mle_i = testOLERegression(w_i,Xtest_i,ytest)
+
+
+print('MSE without intercept '+str(mle))
+print('MSE with intercept '+str(mle_i))
 
 # Problem 3
+print('\nProblem 3')
 k = 101
 lambdas = np.linspace(0, 1, num=k)
 i = 0
@@ -241,10 +246,10 @@ plt.title('MSE for Test Data')
 
 print('(Train):Minimum MSE:', min_w_map_train, ' at lambda:', min_lambda_train)
 print('(Test):Minimum MSE:', min_w_map_test, ' at lambda:', min_lambda_test)    #   We'll pick "min_lambda_test" as the optimum lambda
-
-# plt.show()
+plt.show()
 
 # Problem 4
+# print('\nProblem 4')
 # k = 101
 # lambdas = np.linspace(0, 1, num=k)
 # i = 0
@@ -276,6 +281,7 @@ print('(Test):Minimum MSE:', min_w_map_test, ' at lambda:', min_lambda_test)    
 #
 #
 # # Problem 5
+# print('\nProblem 5')
 pmax = 7
 lambda_opt = 0.06 # REPLACE THIS WITH lambda_opt estimated from Problem 3
 mses5_train = np.zeros((pmax,2))
