@@ -79,10 +79,8 @@ def learnRidgeRegression(X,y,lambd):
     # Output:                                                                  
     # w = d x 1                                                                
 
-    # #add 1 dimension to y? perhaps not..
-    # y = np.concatenate(([[1]],y))       # OR : y=np.concatenate((np.ones((1,1)),y))
-    X_transpose = np.transpose(X_i);
-    identity = np.identity(X_i.shape[1])
+    X_transpose = np.transpose(X);
+    identity = np.identity(X.shape[1])
     part1a = lambd * identity
     part1b = np.dot(X_transpose,X);
     part1 = np.add(part1a,part1b)
@@ -134,11 +132,16 @@ def mapNonLinear(x,p):
     # x - a single column vector (N x 1)                                       
     # p - integer (>= 0)                                                       
     # Outputs:                                                                 
-    # Xd - (N x (d+1)) 
-	
-    # IMPLEMENT THIS METHOD
-    # return Xd
-    return 1  # REMOVE THIS!
+    # Xd - (N x (p+1))
+
+    Xd = np.ones((x.shape[0],1))
+    x = np.reshape(x,(x.shape[0],1))
+    for i in range(1,p+1):
+        elem = np.array(x**i) #elem = np.array(np.power(Xd,i))
+        Xd = np.concatenate((Xd,elem),1)
+
+    # print(Xd)
+    return Xd
 
 # Main script
 
@@ -207,11 +210,27 @@ lambdas = np.linspace(0, 1, num=k)
 i = 0
 mses3_train = np.zeros((k,1))
 mses3 = np.zeros((k,1))
+#train
+min_w_map_train = sys.maxsize
+min_lambda_train = 0.0
+#test
+min_w_map_test = sys.maxsize
+min_lambda_test = 0.0
+
 for lambd in lambdas:
     w_l = learnRidgeRegression(X_i,y,lambd)
     mses3_train[i] = testOLERegression(w_l,X_i,y)
     mses3[i] = testOLERegression(w_l,Xtest_i,ytest)
+
+    if(mses3_train[i]<min_w_map_train):
+        min_w_map_train = mses3_train[i]
+        min_lambda_train = lambd
+    if(mses3[i]<min_w_map_test):
+        min_w_map_test = mses3[i]
+        min_lambda_test = lambd
+
     i = i + 1
+
 fig = plt.figure(figsize=[12,6])
 plt.subplot(1, 2, 1)
 plt.plot(lambdas,mses3_train)
@@ -220,7 +239,11 @@ plt.subplot(1, 2, 2)
 plt.plot(lambdas,mses3)
 plt.title('MSE for Test Data')
 
-plt.show()
+print('(Train):Minimum MSE:', min_w_map_train, ' at lambda:', min_lambda_train)
+print('(Test):Minimum MSE:', min_w_map_test, ' at lambda:', min_lambda_test)    #   We'll pick "min_lambda_test" as the optimum lambda
+
+# plt.show()
+
 # Problem 4
 # k = 101
 # lambdas = np.linspace(0, 1, num=k)
@@ -253,28 +276,28 @@ plt.show()
 #
 #
 # # Problem 5
-# pmax = 7
-# lambda_opt = 0 # REPLACE THIS WITH lambda_opt estimated from Problem 3
-# mses5_train = np.zeros((pmax,2))
-# mses5 = np.zeros((pmax,2))
-# for p in range(pmax):
-#     Xd = mapNonLinear(X[:,2],p)
-#     Xdtest = mapNonLinear(Xtest[:,2],p)
-#     w_d1 = learnRidgeRegression(Xd,y,0)
-#     mses5_train[p,0] = testOLERegression(w_d1,Xd,y)
-#     mses5[p,0] = testOLERegression(w_d1,Xdtest,ytest)
-#     w_d2 = learnRidgeRegression(Xd,y,lambda_opt)
-#     mses5_train[p,1] = testOLERegression(w_d2,Xd,y)
-#     mses5[p,1] = testOLERegression(w_d2,Xdtest,ytest)
-#
-# fig = plt.figure(figsize=[12,6])
-# plt.subplot(1, 2, 1)
-# plt.plot(range(pmax),mses5_train)
-# plt.title('MSE for Train Data')
-# plt.legend(('No Regularization','Regularization'))
-# plt.subplot(1, 2, 2)
-# plt.plot(range(pmax),mses5)
-# plt.title('MSE for Test Data')
-# plt.legend(('No Regularization','Regularization'))
-# plt.show()
+pmax = 7
+lambda_opt = 0.06 # REPLACE THIS WITH lambda_opt estimated from Problem 3
+mses5_train = np.zeros((pmax,2))
+mses5 = np.zeros((pmax,2))
+for p in range(pmax):
+    Xd = mapNonLinear(X[:,2],p)
+    Xdtest = mapNonLinear(Xtest[:,2],p)
+    w_d1 = learnRidgeRegression(Xd,y,0)
+    mses5_train[p,0] = testOLERegression(w_d1,Xd,y)
+    mses5[p,0] = testOLERegression(w_d1,Xdtest,ytest)
+    w_d2 = learnRidgeRegression(Xd,y,lambda_opt)
+    mses5_train[p,1] = testOLERegression(w_d2,Xd,y)
+    mses5[p,1] = testOLERegression(w_d2,Xdtest,ytest)
+
+fig = plt.figure(figsize=[12,6])
+plt.subplot(1, 2, 1)
+plt.plot(range(pmax),mses5_train)
+plt.title('MSE for Train Data')
+plt.legend(('No Regularization','Regularization'))
+plt.subplot(1, 2, 2)
+plt.plot(range(pmax),mses5)
+plt.title('MSE for Test Data')
+plt.legend(('No Regularization','Regularization'))
+plt.show()
 
