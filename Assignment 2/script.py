@@ -15,9 +15,9 @@ def ldaLearn(X,y):
     #
     # Outputs
     # means - A d x k matrix containing learnt means for each of the k classes
-    # covmat - A single d x d learnt covariance matrix 
-    
-    # IMPLEMENT THIS METHOD 
+    # covmat - A single d x d learnt covariance matrix
+
+    # IMPLEMENT THIS METHOD
     # return means,covmat
     return 1    #REMOVE THIS!
 
@@ -29,7 +29,7 @@ def qdaLearn(X,y):
     # Outputs
     # means - A d x k matrix containing learnt means for each of the k classes
     # covmats - A list of k d x d learnt covariance matrices for each of the k classes
-    
+
     # IMPLEMENT THIS METHOD
     # return means,covmats
     return 1  # REMOVE THIS!
@@ -61,11 +61,11 @@ def qdaTest(means,covmats,Xtest,ytest):
     return 1  # REMOVE THIS!
 
 def learnOLERegression(X,y):
-    # Inputs:                                                         
-    # X = N x d 
-    # y = N x 1                                                               
-    # Output: 
-    # w = d x 1 
+    # Inputs:
+    # X = N x d
+    # y = N x 1
+    # Output:
+    # w = d x 1
     X_transpose = np.transpose(X)
 
     w = np.dot(np.dot(inv(np.dot(X_transpose,X)),X_transpose),y)
@@ -74,11 +74,11 @@ def learnOLERegression(X,y):
 
 def learnRidgeRegression(X,y,lambd):
     # Inputs:
-    # X = N x d                                                               
-    # y = N x 1 
+    # X = N x d
+    # y = N x 1
     # lambd = ridge parameter (scalar)
-    # Output:                                                                  
-    # w = d x 1                                                                
+    # Output:
+    # w = d x 1
 
     X_transpose = np.transpose(X)
     identity = np.identity(X.shape[1])
@@ -122,17 +122,42 @@ def regressionObjVal(w, X, y, lambd):
 
     # compute squared error (scalar) and gradient of squared error with respect
     # to w (vector) for the given data X and y and the regularization parameter
-    # lambda                                                                  
+    # lambda
 
-    # IMPLEMENT THIS METHOD                                             
-    # return error, error_grad
-    return 1  # REMOVE THIS!
+    # IMPLEMENT THIS METHOD
+
+    # Exact loss function :
+    w_transpose = np.array([w]).T
+
+    #parta =
+    partaSquared = np.dot(np.transpose(np.subtract(y, np.dot(X, w_transpose))), np.subtract(y, np.dot(X, w_transpose)))
+    #parta = np.sum(partaSquared)
+    parta = partaSquared/2
+
+    wSquared = np.dot(w, w_transpose)
+    partb = np.dot(lambd, wSquared)
+    partb = partb/2
+
+    error = parta + partb
+    #
+    # # Gradient descent
+    part2a = np.subtract(np.dot(X, w_transpose), y)
+    part2a = np.dot(np.transpose(part2a), X)
+
+    part2b = np.dot(lambd, w)
+    error_grad = part2a + part2b
+
+    return error.flatten(), error_grad.flatten()
+    #
+
+    #return 1  # REMOVE THIS!
+
 
 def mapNonLinear(x,p):
-    # Inputs:                                                                  
-    # x - a single column vector (N x 1)                                       
-    # p - integer (>= 0)                                                       
-    # Outputs:                                                                 
+    # Inputs:
+    # x - a single column vector (N x 1)
+    # p - integer (>= 0)
+    # Outputs:
     # Xd - (N x (p+1))
 
     Xd = np.ones((x.shape[0],1))
@@ -148,7 +173,7 @@ def mapNonLinear(x,p):
 
 # Problem 1
 # print('\nProblem 1')
-# load the sample data                                                                 
+# load the sample data
 # if sys.version_info.major == 2:
 #     X,y,Xtest,ytest = pickle.load(open('sample.pickle','rb'))
 # else:
@@ -187,7 +212,7 @@ def mapNonLinear(x,p):
 # plt.title('QDA')
 #
 # plt.show()
-# Problem 2
+#Problem 2
 print('\nProblem 2')
 if sys.version_info.major == 2:
     X,y,Xtest,ytest = pickle.load(open('diabetes.pickle','rb'))
@@ -208,7 +233,7 @@ mle_i = testOLERegression(w_i,Xtest_i,ytest)
 print('MSE without intercept '+str(mle))
 print('MSE with intercept '+str(mle_i))
 
-# Problem 3
+# # Problem 3
 print('\nProblem 3')
 k = 101
 lambdas = np.linspace(0, 1, num=k)
@@ -249,39 +274,39 @@ print('(Test):Minimum MSE:', min_w_map_test, ' at lambda:', min_lambda_test)    
 plt.show()
 
 # Problem 4
-# print('\nProblem 4')
-# k = 101
-# lambdas = np.linspace(0, 1, num=k)
-# i = 0
-# mses4_train = np.zeros((k,1))
-# mses4 = np.zeros((k,1))
-# opts = {'maxiter' : 20}    # Preferred value.
-# w_init = np.ones((X_i.shape[1],1))
-# for lambd in lambdas:
-#     args = (X_i, y, lambd)
-#     w_l = minimize(regressionObjVal, w_init, jac=True, args=args,method='CG', options=opts)
-#     w_l = np.transpose(np.array(w_l.x))
-#     w_l = np.reshape(w_l,[len(w_l),1])
-#     mses4_train[i] = testOLERegression(w_l,X_i,y)
-#     mses4[i] = testOLERegression(w_l,Xtest_i,ytest)
-#     i = i + 1
-# fig = plt.figure(figsize=[12,6])
-# plt.subplot(1, 2, 1)
-# plt.plot(lambdas,mses4_train)
-# plt.plot(lambdas,mses3_train)
-# plt.title('MSE for Train Data')
-# plt.legend(['Using scipy.minimize','Direct minimization'])
+print('\nProblem 4')
+k = 101
+lambdas = np.linspace(0, 1, num=k)
+i = 0
+mses4_train = np.zeros((k,1))
+mses4 = np.zeros((k,1))
+opts = {'maxiter' : 70}    # Preferred value.
+w_init = np.ones((X_i.shape[1],1))
+for lambd in lambdas:
+    args = (X_i, y, lambd)
+    w_l = minimize(regressionObjVal, w_init, jac=True, args=args,method='CG', options=opts)
+    w_l = np.transpose(np.array(w_l.x))
+    w_l = np.reshape(w_l,[len(w_l),1])
+    mses4_train[i] = testOLERegression(w_l,X_i,y)
+    mses4[i] = testOLERegression(w_l,Xtest_i,ytest)
+    i = i + 1
+fig = plt.figure(figsize=[12,6])
+plt.subplot(1, 2, 1)
+plt.plot(lambdas,mses4_train)
+plt.plot(lambdas,mses3_train)
+plt.title('MSE for Train Data')
+plt.legend(['Using scipy.minimize','Direct minimization'])
+
+plt.subplot(1, 2, 2)
+plt.plot(lambdas,mses4)
+plt.plot(lambdas,mses3)
+plt.title('MSE for Test Data')
+plt.legend(['Using scipy.minimize','Direct minimization'])
+plt.show()
 #
-# plt.subplot(1, 2, 2)
-# plt.plot(lambdas,mses4)
-# plt.plot(lambdas,mses3)
-# plt.title('MSE for Test Data')
-# plt.legend(['Using scipy.minimize','Direct minimization'])
-# plt.show()
 #
-#
-# # Problem 5
-# print('\nProblem 5')
+# Problem 5
+print('\nProblem 5')
 pmax = 7
 lambda_opt = 0.06 # REPLACE THIS WITH lambda_opt estimated from Problem 3
 mses5_train = np.zeros((pmax,2))
@@ -306,4 +331,3 @@ plt.plot(range(pmax),mses5)
 plt.title('MSE for Test Data')
 plt.legend(('No Regularization','Regularization'))
 plt.show()
-
