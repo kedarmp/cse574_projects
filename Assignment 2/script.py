@@ -19,7 +19,27 @@ def ldaLearn(X,y):
 
     # IMPLEMENT THIS METHOD
     # return means,covmat
-    return 1    #REMOVE THIS!
+    #``
+    array_of_classes = np.unique(y);
+
+    mean_matrix = np.zeros((1, X.shape[1]))
+    for i in range(0, array_of_classes.shape[0]):
+        array_of_indices = np.where(y == array_of_classes[i])[0]
+        new_matrix_class = np.vstack(X[array_of_indices])
+        mean_new_matrix = np.mean(new_matrix_class, axis = 0)
+        mean_matrix = np.vstack((mean_matrix, mean_new_matrix))
+
+    mean_matrix = np.delete(mean_matrix, 0, 0)
+    mean_matrix = np.transpose(mean_matrix)
+    cov_matrix = np.transpose(X)
+    cov_matrix = np.cov(cov_matrix)
+
+    means = mean_matrix
+    covmat = cov_matrix
+
+
+
+    return means,covmat
 
 def qdaLearn(X,y):
     # Inputs
@@ -32,7 +52,31 @@ def qdaLearn(X,y):
 
     # IMPLEMENT THIS METHOD
     # return means,covmats
-    return 1  # REMOVE THIS!
+    array_of_classes = np.unique(y);
+
+
+    mean_matrix = np.zeros((1, X.shape[1]))
+    list_of_covar = []
+    for i in range(0, array_of_classes.shape[0]):
+        array_of_indices = np.where(y == array_of_classes[i])[0]
+        new_matrix_class = np.vstack(X[array_of_indices])
+        mean_new_matrix = np.mean(new_matrix_class, axis = 0)
+        mean_matrix = np.vstack((mean_matrix, mean_new_matrix))
+
+        covar_matrix = np.transpose(new_matrix_class)
+        covar_matrix = np.cov(covar_matrix)
+        list_of_covar.append(covar_matrix)
+
+
+
+    mean_matrix = np.delete(mean_matrix, 0, 0)
+    mean_matrix = np.transpose(mean_matrix)
+
+    means = mean_matrix
+    covmats = list_of_covar
+
+
+    return means,covmats
 
 def ldaTest(means,covmat,Xtest,ytest):
     # Inputs
@@ -43,9 +87,38 @@ def ldaTest(means,covmat,Xtest,ytest):
     # acc - A scalar accuracy value
     # ypred - N x 1 column vector indicating the predicted labels
 
-    # IMPLEMENT THIS METHOD
-    # return acc,ypred
-    return 1  # REMOVE THIS!
+    total_matrix = np.zeros((1, Xtest.shape[0]))
+
+
+
+    for i in range(0, means.shape[1]):
+        mean = np.transpose(means[:, i])
+        sub = np.subtract(Xtest, mean)
+        sub_dot = np.dot(sub, np.linalg.inv(covmat))
+        final_matrix = np.dot(sub_dot, np.transpose(sub))
+        only_diagonal_values_matrix = np.diag(final_matrix)
+        total_matrix = np.vstack((total_matrix, only_diagonal_values_matrix))
+
+    total_matrix = np.delete(total_matrix, 0, 0)
+
+    min_values = np.argmin(total_matrix, axis = 0) + 1
+
+    ypred = min_values
+
+    count = 0
+
+    for i in range(0, ytest.shape[0]):
+        if(int(ytest[i][0]) == min_values[i]):
+            count = count + 1
+
+    acc = float(count)/ float(ytest.shape[0]) * 100
+
+
+
+
+
+
+    return acc,ypred
 
 def qdaTest(means,covmats,Xtest,ytest):
     # Inputs
@@ -56,9 +129,32 @@ def qdaTest(means,covmats,Xtest,ytest):
     # acc - A scalar accuracy value
     # ypred - N x 1 column vector indicating the predicted labels
 
-    # IMPLEMENT THIS METHOD
-    # return acc,ypred
-    return 1  # REMOVE THIS!
+    total_matrix = np.zeros((1, Xtest.shape[0]))
+
+
+    for i in range(0, means.shape[1]):
+        mean = np.transpose(means[:, i])
+        covmat = covmats[i]
+        sub = np.subtract(Xtest, mean)
+        sub_dot = np.dot(sub, np.linalg.inv(covmat))
+
+        final_matrix = np.multiply((1/np.sqrt(np.linalg.det(covmat))), np.exp(np.multiply(-0.5, np.dot(sub_dot, np.transpose(sub)))))
+        only_diagonal_values_matrix = np.diag(final_matrix)
+        total_matrix = np.vstack((total_matrix, only_diagonal_values_matrix))
+
+
+    total_matrix = np.delete(total_matrix, 0, 0)
+    min_values = np.argmax(total_matrix, axis = 0) + 1
+    ypred = min_values
+
+    count = 0
+    for i in range(0, ytest.shape[0]):
+        if(int(ytest[i][0]) == min_values[i]):
+            count = count + 1
+
+    acc = float(count)/ float(ytest.shape[0]) * 100
+
+    return acc,ypred
 
 def learnOLERegression(X,y):
     # Inputs:
@@ -172,46 +268,47 @@ def mapNonLinear(x,p):
 # Main script
 
 # Problem 1
-# print('\nProblem 1')
-# load the sample data
-# if sys.version_info.major == 2:
-#     X,y,Xtest,ytest = pickle.load(open('sample.pickle','rb'))
-# else:
-#     X,y,Xtest,ytest = pickle.load(open('sample.pickle','rb'),encoding = 'latin1')
-#
-# # LDA
-# means,covmat = ldaLearn(X,y)
-# ldaacc,ldares = ldaTest(means,covmat,Xtest,ytest)
-# print('LDA Accuracy = '+str(ldaacc))
-# # QDA
-# means,covmats = qdaLearn(X,y)
-# qdaacc,qdares = qdaTest(means,covmats,Xtest,ytest)
-# print('QDA Accuracy = '+str(qdaacc))
-#
-# # plotting boundaries
-# x1 = np.linspace(-5,20,100)
-# x2 = np.linspace(-5,20,100)
-# xx1,xx2 = np.meshgrid(x1,x2)
-# xx = np.zeros((x1.shape[0]*x2.shape[0],2))
-# xx[:,0] = xx1.ravel()
-# xx[:,1] = xx2.ravel()
-#
-# fig = plt.figure(figsize=[12,6])
-# plt.subplot(1, 2, 1)
-#
-# zacc,zldares = ldaTest(means,covmat,xx,np.zeros((xx.shape[0],1)))
-# plt.contourf(x1,x2,zldares.reshape((x1.shape[0],x2.shape[0])),alpha=0.3)
-# plt.scatter(Xtest[:,0],Xtest[:,1],c=ytest)
-# plt.title('LDA')
-#
-# plt.subplot(1, 2, 2)
-#
-# zacc,zqdares = qdaTest(means,covmats,xx,np.zeros((xx.shape[0],1)))
-# plt.contourf(x1,x2,zqdares.reshape((x1.shape[0],x2.shape[0])),alpha=0.3)
-# plt.scatter(Xtest[:,0],Xtest[:,1],c=ytest)
-# plt.title('QDA')
-#
-# plt.show()
+print('\nProblem 1')
+#load the sample data
+if sys.version_info.major == 2:
+    X,y,Xtest,ytest = pickle.load(open('sample.pickle','rb'))
+else:
+    X,y,Xtest,ytest = pickle.load(open('sample.pickle','rb'),encoding = 'latin1')
+
+# LDA
+means,covmat = ldaLearn(X,y)
+ldaacc,ldares = ldaTest(means,covmat,Xtest,ytest)
+print('LDA Accuracy = '+str(ldaacc))
+# QDA
+means,covmats = qdaLearn(X,y)
+qdaacc,qdares = qdaTest(means,covmats,Xtest,ytest)
+print('QDA Accuracy = '+str(qdaacc))
+
+# plotting boundaries
+x1 = np.linspace(-5,20,100)
+x2 = np.linspace(-5,20,100)
+xx1,xx2 = np.meshgrid(x1,x2)
+xx = np.zeros((x1.shape[0]*x2.shape[0],2))
+xx[:,0] = xx1.ravel()
+xx[:,1] = xx2.ravel()
+
+fig = plt.figure(figsize=[12,6])
+plt.subplot(1, 2, 1)
+
+zacc,zldares = ldaTest(means,covmat,xx,np.zeros((xx.shape[0],1)))
+plt.contourf(x1,x2,zldares.reshape((x1.shape[0],x2.shape[0])),alpha=0.3)
+plt.scatter(Xtest[:,0],Xtest[:,1],c=ytest)
+plt.title('LDA')
+
+plt.subplot(1, 2, 2)
+
+zacc,zqdares = qdaTest(means,covmats,xx,np.zeros((xx.shape[0],1)))
+plt.contourf(x1,x2,zqdares.reshape((x1.shape[0],x2.shape[0])),alpha=0.3)
+plt.scatter(Xtest[:,0],Xtest[:,1],c=ytest)
+plt.title('QDA')
+
+plt.show()
+
 #Problem 2
 print('\nProblem 2')
 if sys.version_info.major == 2:
@@ -291,6 +388,8 @@ for lambd in lambdas:
     mses4[i] = testOLERegression(w_l,Xtest_i,ytest)
     i = i + 1
 fig = plt.figure(figsize=[12,6])
+print("Min MSE4 train :" , np.amin(mses4_train))
+print("Min MSE4 test :" , np.amin(mses4))
 plt.subplot(1, 2, 1)
 plt.plot(lambdas,mses4_train)
 plt.plot(lambdas,mses3_train)
