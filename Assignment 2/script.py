@@ -395,12 +395,16 @@ plt.plot(lambdas,mses4_train)
 plt.plot(lambdas,mses3_train)
 plt.title('MSE for Train Data')
 plt.legend(['Using scipy.minimize','Direct minimization'])
+plt.xlabel('Lambda')
+plt.ylabel('MSE')
 
 plt.subplot(1, 2, 2)
 plt.plot(lambdas,mses4)
 plt.plot(lambdas,mses3)
 plt.title('MSE for Test Data')
 plt.legend(['Using scipy.minimize','Direct minimization'])
+plt.xlabel('Lambda')
+plt.ylabel('MSE')
 plt.show()
 #
 #
