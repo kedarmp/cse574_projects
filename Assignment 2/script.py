@@ -265,6 +265,17 @@ def mapNonLinear(x,p):
     # print(Xd)
     return Xd
 
+
+
+#For Comparing weights
+
+def calculateL2Norm(weight):
+    print('shape of weight:',weight.shape[0])
+    l2Norm = 0.0
+    for i in range(0, weight.shape[0]):
+        l2Norm+=weight[i]**2
+    return l2Norm
+
 # Main script
 
 # Problem 1
@@ -299,8 +310,8 @@ zacc,zldares = ldaTest(means,covmat,xx,np.zeros((xx.shape[0],1)))
 plt.contourf(x1,x2,zldares.reshape((x1.shape[0],x2.shape[0])),alpha=0.3)
 plt.scatter(Xtest[:,0],Xtest[:,1],c=ytest)
 plt.title('LDA')
-
 plt.subplot(1, 2, 2)
+
 
 zacc,zqdares = qdaTest(means,covmats,xx,np.zeros((xx.shape[0],1)))
 plt.contourf(x1,x2,zqdares.reshape((x1.shape[0],x2.shape[0])),alpha=0.3)
@@ -320,6 +331,7 @@ else:
 X_i = np.concatenate((np.ones((X.shape[0],1)), X), axis=1)
 Xtest_i = np.concatenate((np.ones((Xtest.shape[0],1)), Xtest), axis=1)
 
+
 w = learnOLERegression(X,y)
 mle = testOLERegression(w,Xtest,ytest)
 
@@ -327,8 +339,26 @@ w_i = learnOLERegression(X_i,y)
 mle_i = testOLERegression(w_i,Xtest_i,ytest)
 
 
-print('MSE without intercept '+str(mle))
-print('MSE with intercept '+str(mle_i))
+print('MSE without intercept on test data '+str(mle))
+print('MSE with intercept on test data'+str(mle_i))
+#The same thing, except testing on train data
+mle = testOLERegression(w,X,y)
+mle_i = testOLERegression(w_i,X_i,y)
+
+print('MSE without intercept on train data'+str(mle))
+print('MSE with intercept on train data'+str(mle_i))
+
+print('L2 Norm for OLE Regression (using w using intercepts on test data):',calculateL2Norm(w_i))
+
+
+
+
+
+#
+# print('MSE without intercept '+str(mle))
+# print('MSE with intercept '+str(mle_i))
+
+
 
 # # Problem 3
 print('\nProblem 3')
@@ -343,6 +373,7 @@ min_lambda_train = 0.0
 #test
 min_w_map_test = sys.maxsize
 min_lambda_test = 0.0
+min_lambda_w = None
 
 for lambd in lambdas:
     w_l = learnRidgeRegression(X_i,y,lambd)
@@ -355,6 +386,8 @@ for lambd in lambdas:
     if(mses3[i]<min_w_map_test):
         min_w_map_test = mses3[i]
         min_lambda_test = lambd
+        min_lambda_test_index = i
+        min_lambda_w = w_l
 
     i = i + 1
 
@@ -362,13 +395,21 @@ fig = plt.figure(figsize=[12,6])
 plt.subplot(1, 2, 1)
 plt.plot(lambdas,mses3_train)
 plt.title('MSE for Train Data')
+plt.xlabel('Lambda')
+plt.ylabel('MSE')
 plt.subplot(1, 2, 2)
 plt.plot(lambdas,mses3)
 plt.title('MSE for Test Data')
+plt.xlabel('Lambda')
+plt.ylabel('MSE')
 
 print('(Train):Minimum MSE:', min_w_map_train, ' at lambda:', min_lambda_train)
 print('(Test):Minimum MSE:', min_w_map_test, ' at lambda:', min_lambda_test)    #   We'll pick "min_lambda_test" as the optimum lambda
 plt.show()
+
+#Print l2 for min lambda (test)
+print('L2 Norm for Ridge Regression (using w corresponding to min lambda on test data):',calculateL2Norm(min_lambda_w))
+
 
 # Problem 4
 print('\nProblem 4')
@@ -405,13 +446,14 @@ plt.title('MSE for Test Data')
 plt.legend(['Using scipy.minimize','Direct minimization'])
 plt.xlabel('Lambda')
 plt.ylabel('MSE')
+
 plt.show()
 #
 #
 # Problem 5
 print('\nProblem 5')
 pmax = 7
-lambda_opt = 0.06 # REPLACE THIS WITH lambda_opt estimated from Problem 3
+lambda_opt = min_lambda_test # REPLACE THIS WITH lambda_opt estimated from Problem 3
 mses5_train = np.zeros((pmax,2))
 mses5 = np.zeros((pmax,2))
 for p in range(pmax):
@@ -420,6 +462,8 @@ for p in range(pmax):
     w_d1 = learnRidgeRegression(Xd,y,0)
     mses5_train[p,0] = testOLERegression(w_d1,Xd,y)
     mses5[p,0] = testOLERegression(w_d1,Xdtest,ytest)
+
+
     w_d2 = learnRidgeRegression(Xd,y,lambda_opt)
     mses5_train[p,1] = testOLERegression(w_d2,Xd,y)
     mses5[p,1] = testOLERegression(w_d2,Xdtest,ytest)
@@ -428,9 +472,24 @@ fig = plt.figure(figsize=[12,6])
 plt.subplot(1, 2, 1)
 plt.plot(range(pmax),mses5_train)
 plt.title('MSE for Train Data')
+plt.xlabel('Degree of polynomial')
+plt.ylabel('MSE')
+
 plt.legend(('No Regularization','Regularization'))
 plt.subplot(1, 2, 2)
 plt.plot(range(pmax),mses5)
+
 plt.title('MSE for Test Data')
 plt.legend(('No Regularization','Regularization'))
+plt.xlabel('Degree of polynomial')
+plt.ylabel('MSE')
 plt.show()
+
+#find min MSE for train data
+
+
+print('(Problem 5) Minimum MSE for test data',np.amin(mses5))
+print('(Problem 5) Minimum MSE for train data',np.amin(mses5_train))
+
+
+#find min MSE for test data
