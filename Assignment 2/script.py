@@ -310,8 +310,8 @@ zacc,zldares = ldaTest(means,covmat,xx,np.zeros((xx.shape[0],1)))
 plt.contourf(x1,x2,zldares.reshape((x1.shape[0],x2.shape[0])),alpha=0.3)
 plt.scatter(Xtest[:,0],Xtest[:,1],c=ytest)
 plt.title('LDA')
-
 plt.subplot(1, 2, 2)
+
 
 zacc,zqdares = qdaTest(means,covmats,xx,np.zeros((xx.shape[0],1)))
 plt.contourf(x1,x2,zqdares.reshape((x1.shape[0],x2.shape[0])),alpha=0.3)
@@ -395,9 +395,13 @@ fig = plt.figure(figsize=[12,6])
 plt.subplot(1, 2, 1)
 plt.plot(lambdas,mses3_train)
 plt.title('MSE for Train Data')
+plt.xlabel('Lambda')
+plt.ylabel('MSE')
 plt.subplot(1, 2, 2)
 plt.plot(lambdas,mses3)
 plt.title('MSE for Test Data')
+plt.xlabel('Lambda')
+plt.ylabel('MSE')
 
 print('(Train):Minimum MSE:', min_w_map_train, ' at lambda:', min_lambda_train)
 print('(Test):Minimum MSE:', min_w_map_test, ' at lambda:', min_lambda_test)    #   We'll pick "min_lambda_test" as the optimum lambda
@@ -432,12 +436,16 @@ plt.plot(lambdas,mses4_train)
 plt.plot(lambdas,mses3_train)
 plt.title('MSE for Train Data')
 plt.legend(['Using scipy.minimize','Direct minimization'])
-
+plt.xlabel('Lambda')
+plt.ylabel('MSE')
 plt.subplot(1, 2, 2)
 plt.plot(lambdas,mses4)
 plt.plot(lambdas,mses3)
 plt.title('MSE for Test Data')
 plt.legend(['Using scipy.minimize','Direct minimization'])
+plt.xlabel('Lambda')
+plt.ylabel('MSE')
+
 plt.show()
 #
 #
@@ -463,11 +471,17 @@ fig = plt.figure(figsize=[12,6])
 plt.subplot(1, 2, 1)
 plt.plot(range(pmax),mses5_train)
 plt.title('MSE for Train Data')
+plt.xlabel('Degree of polynomial')
+plt.ylabel('MSE')
+
 plt.legend(('No Regularization','Regularization'))
 plt.subplot(1, 2, 2)
 plt.plot(range(pmax),mses5)
+
 plt.title('MSE for Test Data')
 plt.legend(('No Regularization','Regularization'))
+plt.xlabel('Degree of polynomial')  
+plt.ylabel('MSE')
 plt.show()
 
 #find min MSE for train data
