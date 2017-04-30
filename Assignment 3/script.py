@@ -2,6 +2,9 @@ import numpy as np
 from scipy.io import loadmat
 from scipy.optimize import minimize
 
+from sklearn import svm
+from sklearn.metrics import accuracy_score
+import matplotlib.pyplot as plt
 
 def preprocess():
     """ 
@@ -198,6 +201,51 @@ def mlrPredict(W, data):
 
 
 """
+Func for plotting only (using results from the file output_svm).
+"""
+
+def plot():
+    _cvalues = [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+
+    _rbf_train_predicted = [94.293999999999997, 97.131999999999991, 97.951999999999998, 98.372, 98.706000000000003,
+                            99.001999999999995, 99.195999999999998, 99.339999999999989, 99.438000000000002,
+                            99.542000000000002, 99.611999999999995]
+    _rbf_valid_predicted = [94.02000000000001, 96.179999999999993, 96.899999999999991, 97.099999999999994,
+                            97.230000000000004, 97.310000000000002, 97.379999999999995, 97.359999999999999,
+                            97.390000000000001, 97.359999999999999, 97.409999999999997]
+    _rbf_test_predicted = [94.420000000000002, 96.099999999999994, 96.670000000000002, 97.040000000000006,
+                           97.189999999999998, 97.189999999999998, 97.159999999999997, 97.260000000000005,
+                           97.330000000000013, 97.340000000000003, 97.399999999999991]
+
+    # plt.figure(figsize=[12,6])
+    plt.xlabel('C')
+    plt.ylabel('Accuracy (%)')
+    plt.title('SVM  performance (RBF kernel)')
+    plt.plot(_cvalues, _rbf_train_predicted, label='Train data');
+    plt.legend(loc='best')
+    plt.plot(_cvalues, _rbf_valid_predicted, label='Validation data')
+    plt.legend(loc='best')
+    plt.plot(_cvalues, _rbf_test_predicted, label='Test data')
+    plt.legend(loc='best')
+    plt.show()
+
+    linear_res = [97.286, 93.64, 93.78]
+    rbf_1_res = [100.0, 15.48, 17.14]
+    rbf_res = [94.294, 94.02, 94.42]
+
+    plt.xlabel('Kernel Configurations')
+    x = ['Train data', 'Validation data', 'Test data']
+    plt.plot(linear_res, label='Linear')
+    plt.plot(rbf_1_res, label='RBF (gamma=1)');
+    plt.plot(rbf_res, label='RBF (default)');
+    plt.xticks(range(len(x)), x)
+    plt.ylabel('Accuracy (%)')
+    plt.legend(loc='best')
+    plt.title('Comparison between SVM kernels using different parameters')
+    plt.show()
+
+
+"""
 Script for Logistic Regression
 """
 train_data, train_label, validation_data, validation_label, test_data, test_label = preprocess()
@@ -242,14 +290,77 @@ Script for Support Vector Machine
 """
 
 print('\n\n--------------SVM-------------------\n\n')
-##################
-# YOUR CODE HERE #
-##################
 
+# Plot-only function
+#plot()
+
+print('\nLinear kernel');
+#Linear kernel
+clf = svm.SVC(kernel='linear')
+clf.fit(train_data,np.ravel(train_label))
+predicted_label= clf.predict(train_data)
+print('\n Training set Accuracy:',accuracy_score(train_label,predicted_label)*100,'%')
+predicted_label= clf.predict(validation_data)
+print('\n Validation set Accuracy:',accuracy_score(validation_label,predicted_label)*100,'%')
+predicted_label= clf.predict(test_data)
+print('\n Test set Accuracy:',accuracy_score(test_label,predicted_label)*100,'%')
+
+print('\nRBF with gamma = 1');
+#RBF with gamma = 1
+clf = svm.SVC(gamma=1)
+clf.fit(train_data,np.ravel(train_label))
+predicted_label= clf.predict(train_data)
+print('\n Training set Accuracy:',accuracy_score(train_label,predicted_label)*100,'%')
+predicted_label= clf.predict(validation_data)
+print('\n Validation set Accuracy:',accuracy_score(validation_label,predicted_label)*100,'%')
+predicted_label= clf.predict(test_data)
+print('\n Test set Accuracy:',accuracy_score(test_label,predicted_label)*100,'%')
+
+print('Default RBF\n');
+#Default RBF
+clf = svm.SVC()
+clf.fit(train_data,np.ravel(train_label))
+predicted_label= clf.predict(train_data)
+print('\n Training set Accuracy:',accuracy_score(train_label,predicted_label)*100,'%')
+predicted_label= clf.predict(validation_data)
+print('\n Validation set Accuracy:',accuracy_score(validation_label,predicted_label)*100,'%')
+predicted_label= clf.predict(test_data)
+print('\n Test set Accuracy:',accuracy_score(test_label,predicted_label)*100,'%')
+
+
+print('\nRBF Default with C varying form 1,10,20..100');
+#RBF default, C from 1,10..100:
+cvalues = [1,10,20,30,40,50,60,70,80,90,100]
+rbf_train_predicted = []
+rbf_valid_predicted = []
+rbf_test_predicted = []
+for i in cvalues:
+    print('\n C=',i)
+    clf = svm.SVC(C=i)
+    clf.fit(train_data, np.ravel(train_label))
+    predicted_label = clf.predict(train_data)
+    acc = accuracy_score(train_label, predicted_label) * 100
+    rbf_train_predicted.extend([acc])
+    print('\n Training set Accuracy:', acc, '%')
+
+    predicted_label = clf.predict(validation_data)
+    acc = accuracy_score(validation_label, predicted_label) * 100
+    rbf_valid_predicted.extend([acc])
+    print('\n Validation set Accuracy:', acc, '%')
+
+    predicted_label = clf.predict(test_data)
+    acc = accuracy_score(test_label, predicted_label) * 100
+    rbf_test_predicted.extend([acc])
+    print('\n Test set Accuracy:', acc, '%')
+
+print('Train accuracies:', rbf_train_predicted)
+print('Validation accuracies:', rbf_valid_predicted)
+print('Test accuracies:', rbf_test_predicted)
 
 """
 Script for Extra Credit Part
 """
+print('\nExtra credit\n')
 # FOR EXTRA CREDIT ONLY
 W_b = np.zeros((n_feature + 1, n_class))
 initialWeights_b = np.zeros((n_feature + 1, n_class))

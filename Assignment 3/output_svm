@@ -1,0 +1,128 @@
+
+ Training set Accuracy:9.846%
+
+ Validation set Accuracy:10.0%
+
+ Testing set Accuracy:9.8%
+
+
+--------------SVM-------------------
+
+
+
+Linear kernel
+
+ Training set Accuracy: 97.286 %
+
+ Validation set Accuracy: 93.64 %
+
+ Test set Accuracy: 93.78 %
+
+RBF with gamma = 1
+
+ Training set Accuracy: 100.0 %
+
+ Validation set Accuracy: 15.48 %
+
+ Test set Accuracy: 17.14 %
+Default RBF
+
+
+ Training set Accuracy: 94.294 %
+
+ Validation set Accuracy: 94.02 %
+
+ Test set Accuracy: 94.42 %
+
+RBF Default with C varying form 1,10,20..100
+
+ C= 1
+
+ Training set Accuracy: 94.294 %
+
+ Validation set Accuracy: 94.02 %
+
+ Test set Accuracy: 94.42 %
+
+ C= 10
+
+ Training set Accuracy: 97.132 %
+
+ Validation set Accuracy: 96.18 %
+
+ Test set Accuracy: 96.1 %
+
+ C= 20
+
+ Training set Accuracy: 97.952 %
+
+ Validation set Accuracy: 96.9 %
+
+ Test set Accuracy: 96.67 %
+
+ C= 30
+
+ Training set Accuracy: 98.372 %
+
+ Validation set Accuracy: 97.1 %
+
+ Test set Accuracy: 97.04 %
+
+ C= 40
+
+ Training set Accuracy: 98.706 %
+
+ Validation set Accuracy: 97.23 %
+
+ Test set Accuracy: 97.19 %
+
+ C= 50
+
+ Training set Accuracy: 99.002 %
+
+ Validation set Accuracy: 97.31 %
+
+ Test set Accuracy: 97.19 %
+
+ C= 60
+
+ Training set Accuracy: 99.196 %
+
+ Validation set Accuracy: 97.38 %
+
+ Test set Accuracy: 97.16 %
+
+ C= 70
+
+ Training set Accuracy: 99.34 %
+
+ Validation set Accuracy: 97.36 %
+
+ Test set Accuracy: 97.26 %
+
+ C= 80
+
+ Training set Accuracy: 99.438 %
+
+ Validation set Accuracy: 97.39 %
+
+ Test set Accuracy: 97.33 %
+
+ C= 90
+
+ Training set Accuracy: 99.542 %
+
+ Validation set Accuracy: 97.36 %
+
+ Test set Accuracy: 97.34 %
+
+ C= 100
+
+ Training set Accuracy: 99.612 %
+
+ Validation set Accuracy: 97.41 %
+
+ Test set Accuracy: 97.4 %
+Train accuracies: [94.293999999999997, 97.131999999999991, 97.951999999999998, 98.372, 98.706000000000003, 99.001999999999995, 99.195999999999998, 99.339999999999989, 99.438000000000002, 99.542000000000002, 99.611999999999995]
+Validation accuracies: [94.02000000000001, 96.179999999999993, 96.899999999999991, 97.099999999999994, 97.230000000000004, 97.310000000000002, 97.379999999999995, 97.359999999999999, 97.390000000000001, 97.359999999999999, 97.409999999999997]
+Test accuracies: [94.420000000000002, 96.099999999999994, 96.670000000000002, 97.040000000000006, 97.189999999999998, 97.189999999999998, 97.159999999999997, 97.260000000000005, 97.330000000000013, 97.340000000000003, 97.399999999999991]
