@@ -205,10 +205,34 @@ def mlrObjFunction(params, *args):
         error_grad: the vector of size (D+1) x 10 representing the gradient of
                     error function
     """
+    train_data, labeli = args
+    w = params # init Weight
+
     n_data = train_data.shape[0]
     n_feature = train_data.shape[1]
     error = 0
+    train_data = np.reshape(train_data, (n_data, n_feature))
+    train_data_bias = np.insert(train_data, 0, 1, axis=1)
+    w = np.reshape(w, (n_feature + 1, n_class))
+
+    numA = np.dot(train_data_bias, w)
+    numAexp = np.exp(numA)
+
+    denA = numAexp.sum(axis = 1)[:, None]
+
+    thetaNK = numAexp/denA
+
+    numB = np.multiply(labeli, np.log(thetaNK))
+
+    error = (np.sum(numB) * -1)/n_data
+
     error_grad = np.zeros((n_feature + 1, n_class))
+
+    parta = (thetaNK - labeli)
+
+    error_grad = np.dot(train_data_bias.T, parta)
+
+    error_grad = (error_grad/n_data).flatten()
 
     ##################
     # YOUR CODE HERE #
@@ -234,6 +258,21 @@ def mlrPredict(W, data):
 
     """
     label = np.zeros((data.shape[0], 1))
+
+    data_bias = np.insert(data, 0, 1, axis=1)
+
+    numA = np.dot(data_bias, W)
+
+    numAexp = np.exp(numA)
+
+    denA = numAexp.sum(axis = 1)[:, None]
+
+    thetaNK = numAexp/denA
+
+    label = np.argmax(thetaNK, axis=1)
+
+    label = np.reshape(label, (data.shape[0], 1))
+
 
     ##################
     # YOUR CODE HERE #
@@ -307,98 +346,98 @@ for i in range(n_class):
     Y[:, i] = (train_label == i).astype(int).ravel()
 
 # Logistic Regression with Gradient Descent
-W = np.zeros((n_feature + 1, n_class))
-initialWeights = np.zeros((n_feature + 1, 1))
-opts = {'maxiter': 100}
-for i in range(n_class):
-    labeli = Y[:, i].reshape(n_train, 1)
-    args = (train_data, labeli)
-    nn_params = minimize(blrObjFunction, initialWeights, jac=True, args=args, method='CG', options=opts)
-    W[:, i] = nn_params.x.reshape((n_feature + 1,))
-
-# Find the accuracy on Training Dataset
-predicted_label = blrPredict(W, train_data)
-print('\n Training set Accuracy:' + str(100 * np.mean((predicted_label == train_label).astype(float))) + '%')
-
-# Find the accuracy on Validation Dataset
-predicted_label = blrPredict(W, validation_data)
-print('\n Validation set Accuracy:' + str(100 * np.mean((predicted_label == validation_label).astype(float))) + '%')
-
-# Find the accuracy on Testing Dataset
-predicted_label = blrPredict(W, test_data)
-print('\n Testing set Accuracy:' + str(100 * np.mean((predicted_label == test_label).astype(float))) + '%')
-
-"""
-Script for Support Vector Machine
-"""
-
-print('\n\n--------------SVM-------------------\n\n')
-
-# Plot-only function
-#plot()
-
-print('\nLinear kernel');
-#Linear kernel
-clf = svm.SVC(kernel='linear')
-clf.fit(train_data,np.ravel(train_label))
-predicted_label= clf.predict(train_data)
-print('\n Training set Accuracy:',accuracy_score(train_label,predicted_label)*100,'%')
-predicted_label= clf.predict(validation_data)
-print('\n Validation set Accuracy:',accuracy_score(validation_label,predicted_label)*100,'%')
-predicted_label= clf.predict(test_data)
-print('\n Test set Accuracy:',accuracy_score(test_label,predicted_label)*100,'%')
-
-print('\nRBF with gamma = 1');
-#RBF with gamma = 1
-clf = svm.SVC(gamma=1)
-clf.fit(train_data,np.ravel(train_label))
-predicted_label= clf.predict(train_data)
-print('\n Training set Accuracy:',accuracy_score(train_label,predicted_label)*100,'%')
-predicted_label= clf.predict(validation_data)
-print('\n Validation set Accuracy:',accuracy_score(validation_label,predicted_label)*100,'%')
-predicted_label= clf.predict(test_data)
-print('\n Test set Accuracy:',accuracy_score(test_label,predicted_label)*100,'%')
-
-print('Default RBF\n');
-#Default RBF
-clf = svm.SVC()
-clf.fit(train_data,np.ravel(train_label))
-predicted_label= clf.predict(train_data)
-print('\n Training set Accuracy:',accuracy_score(train_label,predicted_label)*100,'%')
-predicted_label= clf.predict(validation_data)
-print('\n Validation set Accuracy:',accuracy_score(validation_label,predicted_label)*100,'%')
-predicted_label= clf.predict(test_data)
-print('\n Test set Accuracy:',accuracy_score(test_label,predicted_label)*100,'%')
-
-
-print('\nRBF Default with C varying form 1,10,20..100');
-#RBF default, C from 1,10..100:
-cvalues = [1,10,20,30,40,50,60,70,80,90,100]
-rbf_train_predicted = []
-rbf_valid_predicted = []
-rbf_test_predicted = []
-for i in cvalues:
-    print('\n C=',i)
-    clf = svm.SVC(C=i)
-    clf.fit(train_data, np.ravel(train_label))
-    predicted_label = clf.predict(train_data)
-    acc = accuracy_score(train_label, predicted_label) * 100
-    rbf_train_predicted.extend([acc])
-    print('\n Training set Accuracy:', acc, '%')
-
-    predicted_label = clf.predict(validation_data)
-    acc = accuracy_score(validation_label, predicted_label) * 100
-    rbf_valid_predicted.extend([acc])
-    print('\n Validation set Accuracy:', acc, '%')
-
-    predicted_label = clf.predict(test_data)
-    acc = accuracy_score(test_label, predicted_label) * 100
-    rbf_test_predicted.extend([acc])
-    print('\n Test set Accuracy:', acc, '%')
-
-print('Train accuracies:', rbf_train_predicted)
-print('Validation accuracies:', rbf_valid_predicted)
-print('Test accuracies:', rbf_test_predicted)
+# W = np.zeros((n_feature + 1, n_class))
+# initialWeights = np.zeros((n_feature + 1, 1))
+# opts = {'maxiter': 100}
+# for i in range(n_class):
+#     labeli = Y[:, i].reshape(n_train, 1)
+#     args = (train_data, labeli)
+#     nn_params = minimize(blrObjFunction, initialWeights, jac=True, args=args, method='CG', options=opts)
+#     W[:, i] = nn_params.x.reshape((n_feature + 1,))
+#
+# # Find the accuracy on Training Dataset
+# predicted_label = blrPredict(W, train_data)
+# print('\n Training set Accuracy:' + str(100 * np.mean((predicted_label == train_label).astype(float))) + '%')
+#
+# # Find the accuracy on Validation Dataset
+# predicted_label = blrPredict(W, validation_data)
+# print('\n Validation set Accuracy:' + str(100 * np.mean((predicted_label == validation_label).astype(float))) + '%')
+#
+# # Find the accuracy on Testing Dataset
+# predicted_label = blrPredict(W, test_data)
+# print('\n Testing set Accuracy:' + str(100 * np.mean((predicted_label == test_label).astype(float))) + '%')
+#
+# """
+# Script for Support Vector Machine
+# """
+#
+# print('\n\n--------------SVM-------------------\n\n')
+#
+# # Plot-only function
+# #plot()
+#
+# print('\nLinear kernel');
+# #Linear kernel
+# clf = svm.SVC(kernel='linear')
+# clf.fit(train_data,np.ravel(train_label))
+# predicted_label= clf.predict(train_data)
+# print('\n Training set Accuracy:',accuracy_score(train_label,predicted_label)*100,'%')
+# predicted_label= clf.predict(validation_data)
+# print('\n Validation set Accuracy:',accuracy_score(validation_label,predicted_label)*100,'%')
+# predicted_label= clf.predict(test_data)
+# print('\n Test set Accuracy:',accuracy_score(test_label,predicted_label)*100,'%')
+#
+# print('\nRBF with gamma = 1');
+# #RBF with gamma = 1
+# clf = svm.SVC(gamma=1)
+# clf.fit(train_data,np.ravel(train_label))
+# predicted_label= clf.predict(train_data)
+# print('\n Training set Accuracy:',accuracy_score(train_label,predicted_label)*100,'%')
+# predicted_label= clf.predict(validation_data)
+# print('\n Validation set Accuracy:',accuracy_score(validation_label,predicted_label)*100,'%')
+# predicted_label= clf.predict(test_data)
+# print('\n Test set Accuracy:',accuracy_score(test_label,predicted_label)*100,'%')
+#
+# print('Default RBF\n');
+# #Default RBF
+# clf = svm.SVC()
+# clf.fit(train_data,np.ravel(train_label))
+# predicted_label= clf.predict(train_data)
+# print('\n Training set Accuracy:',accuracy_score(train_label,predicted_label)*100,'%')
+# predicted_label= clf.predict(validation_data)
+# print('\n Validation set Accuracy:',accuracy_score(validation_label,predicted_label)*100,'%')
+# predicted_label= clf.predict(test_data)
+# print('\n Test set Accuracy:',accuracy_score(test_label,predicted_label)*100,'%')
+#
+#
+# print('\nRBF Default with C varying form 1,10,20..100');
+# #RBF default, C from 1,10..100:
+# cvalues = [1,10,20,30,40,50,60,70,80,90,100]
+# rbf_train_predicted = []
+# rbf_valid_predicted = []
+# rbf_test_predicted = []
+# for i in cvalues:
+#     print('\n C=',i)
+#     clf = svm.SVC(C=i)
+#     clf.fit(train_data, np.ravel(train_label))
+#     predicted_label = clf.predict(train_data)
+#     acc = accuracy_score(train_label, predicted_label) * 100
+#     rbf_train_predicted.extend([acc])
+#     print('\n Training set Accuracy:', acc, '%')
+#
+#     predicted_label = clf.predict(validation_data)
+#     acc = accuracy_score(validation_label, predicted_label) * 100
+#     rbf_valid_predicted.extend([acc])
+#     print('\n Validation set Accuracy:', acc, '%')
+#
+#     predicted_label = clf.predict(test_data)
+#     acc = accuracy_score(test_label, predicted_label) * 100
+#     rbf_test_predicted.extend([acc])
+#     print('\n Test set Accuracy:', acc, '%')
+#
+# print('Train accuracies:', rbf_train_predicted)
+# print('Validation accuracies:', rbf_valid_predicted)
+# print('Test accuracies:', rbf_test_predicted)
 
 """
 Script for Extra Credit Part
