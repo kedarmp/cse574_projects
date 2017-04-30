@@ -7,21 +7,21 @@ from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
 
 def preprocess():
-    """ 
+    """
      Input:
      Although this function doesn't have any input, you are required to load
      the MNIST data set from file 'mnist_all.mat'.
 
      Output:
-     train_data: matrix of training set. Each row of train_data contains 
+     train_data: matrix of training set. Each row of train_data contains
        feature vector of a image
      train_label: vector of label corresponding to each image in the training
        set
-     validation_data: matrix of training set. Each row of validation_data 
+     validation_data: matrix of training set. Each row of validation_data
        contains feature vector of a image
-     validation_label: vector of label corresponding to each image in the 
+     validation_label: vector of label corresponding to each image in the
        training set
-     test_data: matrix of training set. Each row of test_data contains 
+     test_data: matrix of training set. Each row of test_data contains
        feature vector of a image
      test_label: vector of label corresponding to each image in the testing
        set
@@ -97,11 +97,11 @@ def blrObjFunction(initialWeights, *args):
     its gradient.
 
     Input:
-        initialWeights: the weight vector (w_k) of size (D + 1) x 1 
+        initialWeights: the weight vector (w_k) of size (D + 1) x 1
         train_data: the data matrix of size N x D
         labeli: the label vector (y_k) of size N x 1 where each entry can be either 0 or 1 representing the label of corresponding feature vector
 
-    Output: 
+    Output:
         error: the scalar value of error function of 2-class logistic regression
         error_grad: the vector of size (D+1) x 1 representing the gradient of
                     error function
@@ -118,30 +118,73 @@ def blrObjFunction(initialWeights, *args):
     ##################
     # HINT: Do not forget to add the bias term to your input data
 
+    #print(train_data.shape)
+
+    #Adding bias term to train_data matrix
+    train_data = np.insert(train_data, 0, 1, axis=1)
+    #print train_data.shape
+    N = train_data.shape[0]
+    initialWeights = np.reshape(initialWeights, (716,1))
+    #print initialWeights.shape
+
+
+
+
+    part_1 = np.dot(np.transpose(labeli), np.log(sigmoid(np.dot(train_data, initialWeights))))
+    part_2 = np.dot(np.transpose(1 - labeli), np.log(np.subtract(1, sigmoid(np.dot(train_data, initialWeights)))))
+    error = np.add(error, np.add(part_1, part_2))
+
+    error = np.multiply(np.negative(np.reciprocal(float(N))), error)
+    theta_matrix = sigmoid(np.dot(train_data, initialWeights))
+    #print theta_matrix.shape
+    sub_matrix = np.subtract(theta_matrix, labeli)
+    #print sub_matrix.shape
+    error_grad = np.dot(np.transpose(train_data), sub_matrix)
+
+    error_grad = np.multiply(np.reciprocal(float(N)), error_grad)
+    error_grad = np.ndarray.flatten(error_grad)
+
+
     return error, error_grad
 
 
 def blrPredict(W, data):
     """
-     blrObjFunction predicts the label of data given the data and parameter W 
+     blrObjFunction predicts the label of data given the data and parameter W
      of Logistic Regression
-     
+
      Input:
-         W: the matrix of weight of size (D + 1) x 10. Each column is the weight 
+         W: the matrix of weight of size (D + 1) x 10. Each column is the weight
          vector of a Logistic Regression classifier.
          X: the data matrix of size N x D
-         
-     Output: 
-         label: vector of size N x 1 representing the predicted label of 
+
+     Output:
+         label: vector of size N x 1 representing the predicted label of
          corresponding feature vector given in data matrix
 
     """
-    label = np.zeros((data.shape[0], 1))
+    # label = np.zeros((data.shape[0], 1))
 
     ##################
     # YOUR CODE HERE #
     ##################
     # HINT: Do not forget to add the bias term to your input data
+
+    #print(train_data.shape)
+
+    #Adding bias term to train_data matrix
+    data = np.insert(data, 0, 1, axis=1)
+    #print(train_data.shape)
+    N = data.shape[0]
+
+    theta_matrix = sigmoid(np.dot(data, W))
+    label = np.argmax(theta_matrix, axis=1)
+    print ("shape of label")
+    print (label.shape)
+    label = label.reshape(N,1)
+    print (label)
+    print ("SHAPE OF LABEL")
+    print (label.shape)
 
     return label
 
